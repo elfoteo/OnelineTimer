@@ -149,7 +149,7 @@
             <p>Paused: <%= timer.paused %></p>
             <p>Started: <%= timer.started %></p>
             <p>Elapsed Time: <%= timer.elapsedTime.hours %>h <%= timer.elapsedTime.minutes %>m <%= timer.elapsedTime.seconds %>s</p>
-            <button class="btn start-pause"><%= timer.paused? "Pause": "Start" %></button>
+            <button class="btn start-pause"><%= timer.paused? "Pause": "Resume" %></button>
             <button class="btn remove">Remove</button>
             <button class="btn fullscreen">&#x26F6;</button>
           </div>

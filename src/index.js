@@ -57,17 +57,8 @@ app.get('/login', (req, res) => {
   res.render('login', {registered: req.query.registered}); // Renders login.ejs from the views directory
 });
 
-// Render timer page
-app.get('/timer', (req, res) => {
-    // Assuming you have some logic to calculate the timer value
-    const timerValue = "00:10:30"; // Example timer value
-    
-    // Render the timer view and pass the timerValue variable
-    res.render('timer', { timerValue }); // Renders timer.ejs from the views directory
-});
-
 // Render fullscreen view with timer id and username
-app.get('/fullscreen/:timerId/:username', (req, res) => {
+app.get('/fullscreen/:username/:timerId', (req, res) => {
   const timerId = parseInt(req.params.timerId); // Convert timerId to integer
   const username = req.params.username;
 

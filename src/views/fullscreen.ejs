@@ -28,9 +28,18 @@
                     <div id="reset-icon">
                         <img src="/images/reset.svg" alt="Reset Icon" width="30">
                     </div>
-                </button>          
-            
-    
+                </button>
+                
+                <input type="number" value="0" name="hours" min="0" max="48" class="timerInput" oninput="validateNumber(this)" id="hoursInput">
+                <label for="hoursInput" class="input-label">h<br class="label-helper"></label>
+                
+                <input type="number" value="2" name="minutes" min="0" max="59" class="timerInput" oninput="validateNumber(this)" id="minutesInput">
+                <label for="minutesInput" class="input-label">m<br class="label-helper"></label>
+                
+                <input type="number" value="30" name="seconds" min="0" max="59" class="timerInput" oninput="validateSeconds()" id="secondsInput">
+                <label for="secondsInput" class="input-label">s<br class="label-helper"></label>
+
+
                 <input type='file' hidden id="hiddenUpload" accept="image/*" onchange="uploadImage(event)"/>
                 
                 <button onclick="toggleSound()" class="timerControl active" id="toggleSound">
@@ -101,6 +110,18 @@
                 const tickSound = new Audio('/sounds/tick.mp3');
                 const beepEndSound = new Audio('/sounds/beep-end.wav');
                 let canModifyTimer = JSON.parse('<%- JSON.stringify( isOwner ) %>');
+                
+                if (!canModifyTimer){
+                    document.getElementById('toggleTimer').style.display = 'none';
+                    document.getElementById('reset-button').style.display = 'none';
+                    document.querySelectorAll('.timerInput').forEach(input => {
+                        input.style.display = 'none';
+                    });
+                    document.querySelectorAll('.input-label').forEach(label => {
+                        label.style.display = 'none';
+                    });
+                }
+
                 // Get timer properties from the provided arguments
                 const user = JSON.parse('<%- JSON.stringify(user) %>');
                 

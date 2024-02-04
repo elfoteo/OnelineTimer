@@ -79,42 +79,6 @@ router.post('/login', async (req, res) => {
 });
 
 // Route to create a new timer for a user
-router.post('/timer', verifyToken, (req, res) => {
-  const { name, duration } = req.body;
-  const { username } = req.user;
-
-  // Read existing users data from the JSON file
-  let users = readDataFromFile();
-
-  // Find the user by username
-  const userIndex = users.findIndex((user) => user.username === username);
-
-  if (userIndex === -1) {
-    return res.status(404).send('User not found');
-  }
-
-  // Generate unique ID for the new timer
-  const timerId = Math.floor(Math.random() * 1000);
-
-  // Create the new timer object
-  const newTimer = {
-    id: timerId,
-    name: name || `Timer ${timerId}`,
-    duration: duration || { hours: 0, minutes: 0, seconds: 0 },
-    paused: true,
-    elapsedTime: { hours: 0, minutes: 0, seconds: 0 },
-  };
-
-  // Add the new timer to the user's timers array
-  users[userIndex].timers.push(newTimer);
-
-  // Write the updated users data back to the JSON file
-  writeDataToFile(users);
-
-  res.status(201).send('Timer created successfully');
-});
-
-// Route to create a new timer for a user
 router.post('/addTimer', verifyToken, (req, res) => {
   const { name, duration } = req.body;
   const { username } = req.user;
@@ -149,6 +113,68 @@ router.post('/addTimer', verifyToken, (req, res) => {
   writeDataToFile(users);
 
   res.status(201).send('Timer created successfully');
+});
+
+// Route to pause a timer for a user
+router.put('/pauseTimer/:timerId', verifyToken, (req, res) => {
+  const timerId = parseInt(req.params.timerId); // Convert timerId to integer
+  const { username } = req.user;
+
+  // Read user data from JSON file
+  let users = readDataFromFile();
+  
+  // Find the user object in userData array
+  const user = users.find(user => user.username === username);
+  
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  // Find the timer object with the given timerId
+  const timer = user.timers.find(timer => timer.id === timerId);
+
+  if (!timer) {
+    return res.status(404).send('Timer not found');
+  }
+
+  // Pause the timer
+  timer.paused = true;
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
+  res.status(200).send('Timer paused successfully');
+});
+
+// Route to resume a timer for a user
+router.put('/resumeTimer/:timerId', verifyToken, (req, res) => {
+  const timerId = parseInt(req.params.timerId); // Convert timerId to integer
+  const { username } = req.user;
+
+  // Read user data from JSON file
+  let users = readDataFromFile();
+  
+  // Find the user object in userData array
+  const user = users.find(user => user.username === username);
+  
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  // Find the timer object with the given timerId
+  const timer = user.timers.find(timer => timer.id === timerId);
+
+  if (!timer) {
+    return res.status(404).send('Timer not found');
+  }
+
+  // Resume the timer
+  timer.paused = false;
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
+  res.status(200).send('Timer resumed successfully');
 });
 
 module.exports = router;

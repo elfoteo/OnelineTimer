@@ -52,18 +52,18 @@
         }
       },
       {
-        "id": 134,
-        "name": "test",
+        "id": 68,
+        "name": "timer",
         "duration": {
-          "hours": 10,
-          "minutes": 20,
-          "seconds": 30
+          "hours": 12,
+          "minutes": 23,
+          "seconds": 45
         },
         "paused": false,
         "started": false,
         "elapsedTime": {
           "hours": 0,
-          "minutes": 10,
+          "minutes": 0,
           "seconds": 0
         }
       }

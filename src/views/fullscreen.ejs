@@ -27,14 +27,22 @@
                         <img src="/images/pause.svg" alt="Pause Icon" width="30">
                     </div>
                 </button>
-
+                <!--
                 <button onclick="reset(true)" class="timerControl" id="reset-button" >
                     <div id="particle-container" style="overflow: hidden;"></div>
                     <div id="reset-icon">
                         <img src="/images/reset.svg" alt="Reset Icon" width="30">
                     </div>
                 </button>
-                
+                -->
+
+                <button onclick="share()" class="timerControl" id="share-button" >
+                    <div id="particle-container" style="overflow: hidden;"></div>
+                    <div id="share-icon">
+                        <img src="/images/share.svg" alt="Share Icon" width="30">
+                    </div>
+                </button>
+                <!--
                 <input type="number" value="0" name="hours" min="0" max="48" class="timerInput" oninput="validateNumber(this)" id="hoursInput">
                 <label for="hoursInput" class="input-label">h<br class="label-helper"></label>
                 
@@ -43,7 +51,7 @@
                 
                 <input type="number" value="30" name="seconds" min="0" max="59" class="timerInput" oninput="validateSeconds()" id="secondsInput">
                 <label for="secondsInput" class="input-label">s<br class="label-helper"></label>
-
+                -->
 
                 <input type='file' hidden id="hiddenUpload" accept="image/*" onchange="uploadImage(event)"/>
                 
@@ -117,8 +125,8 @@
                 let canModifyTimer = JSON.parse('<%- JSON.stringify( isOwner ) %>');
                 
                 if (!canModifyTimer){
-                    document.getElementById('toggleTimer').style.display = 'none';
-                    document.getElementById('reset-button').style.display = 'none';
+                    //document.getElementById('toggleTimer').style.display = 'none';
+                    //document.getElementById('reset-button').style.display = 'none';
                     document.querySelectorAll('.timerInput').forEach(input => {
                         input.style.display = 'none';
                     });
@@ -145,50 +153,172 @@
                     }
                 }
 
+                let seconds;
+                let minutes;
+                let hours;
+
+                
+                // Function to pause a timer by its timerId
+                function resumeTimer_(timerId) {
+                    const url = `/auth/resumeTimer/${timerId}`; // URL to pause the timer
+
+                    // Send a PUT request to pause the timer
+                    fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                    .then(response => {
+                    })
+                    .catch(error => {
+                    });
+                }
+
+                // Function to stop a timer by its timerId
+                function stopTimer_(timerId) {
+                    const url = `/auth/stopTimer/${timerId}`; // URL to stop the timer
+
+                    // Send a PUT request to stop the timer
+                    fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    })
+                    .then(response => {
+                    })
+                    .catch(error => {
+                    });
+                }
+
+
                 async function getDataAndContinue(timerId) {
                     try {
                         const timerData = await fetchTimerData(timerId);
-                        if (!timerData) {
-                            // Handle the case when timer data is not available
-                            return;
+                        console.log(timerData)
+                        //document.getElementById("hoursInput").value = timerData.duration.hours;
+                        //document.getElementById("minutesInput").value = timerData.duration.minutes;
+                        //document.getElementById("secondsInput").value = timerData.duration.seconds;
+                        
+                        let carryMinutes = 0;
+                        let carryHours = 0;
+                        let secondsOffset = 0;
+                        let minutesOffset = 0;
+
+                        // Adjust the elapsed time if seconds are negative
+                        if (59 - timerData.duration.seconds + timerData.elapsedTime.seconds >= 60) {
+                            carryMinutes += Math.floor((59 - timerData.duration.seconds + timerData.elapsedTime.seconds) / 60);
+                            secondsOffset += 60;
                         }
 
-                        console.log(timerData); // Log the fetched timer data
+                        // Adjust the elapsed time if minutes are negative
+                        if (59 - timerData.duration.minutes + timerData.elapsedTime.minutes + carryMinutes >= 60) {
+                            carryHours += Math.floor((59 - timerData.duration.minutes + timerData.elapsedTime.minutes + carryMinutes) / 60);
+                            minutesOffset += 60;
+                        }
+
+                        let hoursTimeValue = 47 - timerData.duration.hours - timerData.elapsedTime.hours + carryHours;
+                        let minutesTimeValue = 59 - timerData.duration.minutes + timerData.elapsedTime.minutes + carryMinutes - minutesOffset;
+                        let secondsTimeValue = 59 - timerData.duration.seconds + timerData.elapsedTime.seconds - secondsOffset;
+                        
+                        if ((timerData.elapsedTime.hours-1)*3600 + (timerData.elapsedTime.minutes-1)*60 + (timerData.elapsedTime.seconds-1) <= 0){
+                            resumeTimer_();
+                            stopTimer_();
+                            hours = 0;
+                            minutes = 0;
+                            seconds = 0;
+                        }
+                        console.log(47-hoursTimeValue)
 
                         // Initialize the timer objects using the fetched data
-                        const hours = new Timer(48,
-                            47 - timerData.duration.hours - timerData.elapsedTime.hours,
+                        hours = new Timer(
+                            48,
+                            hoursTimeValue,
                             250, 250, "hours",
-                            function () {
-                                // Callback function for hours timer
-                            }, false, function () {return false;});
-
-                        const minutes = new Timer(60,
-                            59 - timerData.duration.minutes + timerData.elapsedTime.minutes,
+                            function () {},
+                            false,
+                            function () { return false; }
+                        );
+                        minutes = new Timer(
+                            60,
+                            minutesTimeValue,
                             250, 250, "minutes",
                             function () {
-                                // Callback function for minutes timer
-                            }, false, function () {return false;});
-
-                        const seconds = new Timer(60,
-                            59 - timerData.duration.seconds + timerData.elapsedTime.seconds,
+                                if (hours.maxTime - hours.timePassed <= 0) {
+                                    minutes.started = false;
+                                    minutes.animate();
+                                    minutes.label.text(0);
+                                    return;
+                                } else {
+                                    hours.update();
+                                    minutes.timeLimit = minutes.maxTime;
+                                    minutes.paused = false;
+                                    minutes.started = true;
+                                    minutes.timePassed = 0;
+                                    minutes.update();
+                                }
+                            },
+                            false,
+                            function () { return false; }
+                        );
+                        seconds = new Timer(
+                            60,
+                            secondsTimeValue,
                             250, 250, "seconds",
                             function () {
-                                // Callback function for seconds timer
-                            }, true,
+                                if (minutes.maxTime - minutes.timePassed <= 0 && hours.maxTime - hours.timePassed <= 0) {
+                                    if (document.getElementById("toggleSound").classList.contains("active")) {
+                                        resumeTimer();
+                                        stopTimer();
+                                        beepEndSound.play();
+                                        alert("Time is up!");
+                                        beepEndSound.pause();
+                                        beepEndSound.currentTime = 0;
+                                    }
+                                    document.getElementById("toggleTimer").classList.remove('active');
+                                    reset();
+                                } else {
+                                    minutes.update();
+                                    seconds.timeLimit = minutes.maxTime;
+                                    seconds.timePassed = 0;
+                                    seconds.started = true;
+                                    seconds.maxTime = seconds.timeLimit;
+                                    seconds.update();
+                                }
+                            },
+                            true,
                             function () {
                                 return minutes.getRemaningTime() <= 0 && hours.getRemaningTime() <= 0 && seconds.getRemaningTime() <= 15;
-                            }, function () {if (document.getElementById("toggleSound").classList.contains("active")) {tickSound.play()}});
+                            },
+                            function () {
+                                if (document.getElementById("toggleSound").classList.contains("active")) {
+                                    tickSound.play();
+                                }
+                            }
+                        );
 
-                        // Set up timer properties
-                        hours.started = timerData.started;
-                        hours.paused = hours.started ? timerData.paused : true;
+                        if (hoursTimeValue*3600 + minutes.minutesTimeValue*60 + secondsTimeValue <= 0){
+                            hours.started = false;
+                            minutes.started = false;
+                            seconds.started = false;
+                            hours.paused = true;
+                            minutes.paused = true;
+                            seconds.paused = true;
+                        }
+                        else{
+                            // Set up timer properties
+                            hours.started = timerData.started;
+                            hours.paused = hours.started ? timerData.paused : true;
 
-                        minutes.started = timerData.started;
-                        minutes.paused = minutes.started ? timerData.paused : true;
+                            minutes.started = timerData.started;
+                            minutes.paused = minutes.started ? timerData.paused : true;
 
-                        seconds.started = timerData.started;
-                        seconds.paused = seconds.started ? timerData.paused : true;
+                            seconds.started = timerData.started;
+                            seconds.paused = seconds.started ? timerData.paused : true;
+                        }
 
                         hours.animate();
                         minutes.animate();

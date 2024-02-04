@@ -146,6 +146,46 @@ function toggleTheme() {  // Get's called when the button to toggle the theme is
 }
 
 
+function share() {
+    // Get the current page URL
+    var urlToCopy = window.location.href;
+
+    // Copy the URL to the clipboard
+    navigator.clipboard.writeText(urlToCopy)
+        .then(function() {
+            // Success callback
+            console.log("URL copied to clipboard successfully!");
+            // Show a notification message
+            showNotification("URL copied to clipboard!");
+        })
+        .catch(function(error) {
+            // Error callback
+            console.error("Unable to copy URL to clipboard: ", error);
+            // Show a notification message
+            showNotification("Failed to copy URL to clipboard", true);
+        });
+
+    // Add and remove the 'active' class with animation
+    document.getElementById("share-icon").classList.add('active');
+    animationTimeout = setInterval(function() {
+        document.getElementById("share-icon").classList.remove('active');
+    }, 100);
+}
+
+function showNotification(message, isError = false) {
+    var notification = document.createElement('div');
+    notification.textContent = message;
+    notification.classList.add('notification');
+    if (isError) {
+        notification.classList.add('error');
+    }
+    document.body.appendChild(notification);
+    setTimeout(function() {
+        notification.remove();
+    }, 2000);
+}
+
+
 let animationTimeout;
 function reset(fromUser=false){
     if (fromUser){

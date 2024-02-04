@@ -153,6 +153,11 @@
       margin-top: 13px;
     }
 
+    .out-of-range {
+      box-shadow: 0 0 10px red;
+      transition: box-shadow 0.0s ease-out;
+    }
+
     @media screen and (max-width: 600px) {
       .form-container {
         width: 80%;
@@ -207,22 +212,23 @@
       <form id="addTimerForm">
         <div class="form-row">
           <label for="timerName">Timer Name:</label>
-          <input type="text" id="timerName" name="timerName" required>
+          <input type="text" id="timerName" name="timerName" oninput="validateTimerName()" placeholder="Enter timer name..." value="My Timer" required>
         </div>
         <div class="form-row">
           <label for="hours">Hours:</label>
-          <input type="number" id="hours" name="hours" min="0" value="0">
+          <input type="number" id="hours" name="hours" min="0" value="0" oninput="validateNumber(this)">
         </div>
         <div class="form-row">
           <label for="minutes">Minutes:</label>
-          <input type="number" id="minutes" name="minutes" min="0" value="0">
+          <input type="number" id="minutes" name="minutes" min="0" value="2" oninput="validateNumber(this)">
         </div>
         <div class="form-row">
           <label for="seconds">Seconds:</label>
-          <input type="number" id="seconds" name="seconds" min="0" value="0">
+          <input type="number" id="seconds" name="seconds" min="0" value="30" oninput="validateSeconds()">
         </div>
         <button type="submit">Add Timer</button>
       </form>
+      <label class="small-message" style="text-align: left;font-size: 12pt;">Timer name must be between 4 and 16 characters</label>
     </div>
     <script src="/dashboard.js"></script>
   </div>

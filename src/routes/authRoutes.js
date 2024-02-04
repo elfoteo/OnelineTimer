@@ -143,22 +143,6 @@ router.put('/pauseTimer/:timerId', verifyToken, (req, res) => {
     timer.pauseStartTime = Date.now(); // Store the current time when pausing
   }
 
-  // Calculate the elapsed time before pausing
-  const elapsedBeforePausing = Date.now() - timer.timerAddedDate;
-  // Add the elapsed time before pausing to the total elapsed time
-  timer.elapsedTime.seconds += Math.floor(elapsedBeforePausing / 1000) % 60;
-  timer.elapsedTime.minutes += Math.floor(elapsedBeforePausing / 60000) % 60;
-  timer.elapsedTime.hours += Math.floor(elapsedBeforePausing / 3600000);
-  // Adjust the elapsed time
-  if (timer.elapsedTime.seconds >= 60) {
-    timer.elapsedTime.minutes += Math.floor(timer.elapsedTime.seconds / 60);
-    timer.elapsedTime.seconds %= 60;
-  }
-  if (timer.elapsedTime.minutes >= 60) {
-    timer.elapsedTime.hours += Math.floor(timer.elapsedTime.minutes / 60);
-    timer.elapsedTime.minutes %= 60;
-  }
-
   // Write the updated users data back to the JSON file
   writeDataToFile(users);
 
@@ -190,8 +174,10 @@ router.put('/resumeTimer/:timerId', verifyToken, (req, res) => {
   // Resume the timer
   if (timer.paused) {
     timer.paused = false;
-    // Store the elapsed time before resuming
-    timer.timerAddedDate = Date.now();
+    const currentTime = Date.now();
+    const pauseDuration = currentTime - timer.pauseStartTime;
+    // Adjust the timerAddedDate by subtracting the pause duration
+    timer.timerAddedDate += pauseDuration;
   }
 
   // Write the updated users data back to the JSON file

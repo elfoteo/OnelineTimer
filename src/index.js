@@ -144,7 +144,6 @@ app.delete('/removeTimer/:timerId', verifyToken, (req, res) => {
 
   res.status(200).send('Timer removed successfully');
 });
-
 // Define route to serve JSON data for dashboard
 app.get('/dashboard-json', verifyToken, (req, res) => {
   // Retrieve username from token
@@ -157,26 +156,40 @@ app.get('/dashboard-json', verifyToken, (req, res) => {
   const user = users.find(user => user.username === username);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
   }
 
   // Update elapsed time for each timer
   user.timers.forEach(timer => {
-    if (!timer.paused && timer.started) {
-      const elapsedTime = Date.now() - timer.timerAddedDate;
-      timer.elapsedTime.seconds = Math.floor(elapsedTime / 1000) % 60;
-      timer.elapsedTime.minutes = Math.floor(elapsedTime / 60000) % 60;
-      timer.elapsedTime.hours = Math.floor(elapsedTime / 3600000);
-      // Adjust the elapsed time
-      if (timer.elapsedTime.seconds >= 60) {
-        timer.elapsedTime.minutes += Math.floor(timer.elapsedTime.seconds / 60);
-        timer.elapsedTime.seconds %= 60;
+      if (!timer.paused && timer.started) {
+          // Check if elapsed time exceeds duration, then stop the timer
+          const totalElapsedSeconds = timer.elapsedTime.hours * 3600 + timer.elapsedTime.minutes * 60 + timer.elapsedTime.seconds;
+          const totalDurationSeconds = timer.duration.hours * 3600 + timer.duration.minutes * 60 + timer.duration.seconds;
+          if (totalElapsedSeconds >= totalDurationSeconds) {
+            timer.paused = false; // Pause the timer
+            timer.started = false; // Mark the timer as not started
+            console.log(totalDurationSeconds, totalElapsedSeconds)
+            timer.elapsedTime.seconds = 0;
+            timer.elapsedTime.minutes = 0;
+            timer.elapsedTime.hours = 0;
+            timer.timerAddedDate = Date.now();
+          }
+          else{
+            const elapsedTime = Date.now() - timer.timerAddedDate;
+            timer.elapsedTime.seconds = Math.floor(elapsedTime / 1000) % 60;
+            timer.elapsedTime.minutes = Math.floor(elapsedTime / 60000) % 60;
+            timer.elapsedTime.hours = Math.floor(elapsedTime / 3600000);
+            // Adjust the elapsed time
+            if (timer.elapsedTime.seconds >= 60) {
+                timer.elapsedTime.minutes += Math.floor(timer.elapsedTime.seconds / 60);
+                timer.elapsedTime.seconds %= 60;
+            }
+            if (timer.elapsedTime.minutes >= 60) {
+                timer.elapsedTime.hours += Math.floor(timer.elapsedTime.minutes / 60);
+                timer.elapsedTime.minutes %= 60;
+            }
+          }
       }
-      if (timer.elapsedTime.minutes >= 60) {
-        timer.elapsedTime.hours += Math.floor(timer.elapsedTime.minutes / 60);
-        timer.elapsedTime.minutes %= 60;
-      }
-    }
   });
 
   // Write the updated users data back to the JSON file

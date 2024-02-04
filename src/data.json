@@ -4,70 +4,21 @@
     "password": "$2b$10$UkV9mkn81zr3JiaO3i4IAu8lPXwqgbv0OV8FfaAk70m2.L/xWu1sC",
     "timers": [
       {
-        "id": 572,
-        "name": "a",
+        "id": 22,
+        "name": "aaaaaa",
         "duration": {
           "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        },
-        "paused": false,
-        "started": false,
-        "elapsedTime": {
-          "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        }
-      },
-      {
-        "id": 178,
-        "name": "b",
-        "duration": {
-          "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        },
-        "paused": false,
-        "started": false,
-        "elapsedTime": {
-          "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        }
-      },
-      {
-        "id": 282,
-        "name": "c",
-        "duration": {
-          "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        },
-        "paused": false,
-        "started": false,
-        "elapsedTime": {
-          "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        }
-      },
-      {
-        "id": 841,
-        "name": "test",
-        "duration": {
-          "hours": 12,
-          "minutes": 34,
-          "seconds": 56
+          "minutes": 2,
+          "seconds": 30
         },
         "paused": false,
         "started": true,
         "elapsedTime": {
           "hours": 0,
-          "minutes": 32,
-          "seconds": 34
+          "minutes": 0,
+          "seconds": 12
         },
-        "timerAddedDate": 1707059050399,
-        "pauseStartTime": 1707058684704
+        "timerAddedDate": 1707069470301
       }
     ]
   },

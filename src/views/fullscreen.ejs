@@ -124,6 +124,7 @@
 
                 // Get timer properties from the provided arguments
                 const user = JSON.parse('<%- JSON.stringify(user) %>');
+                const timerId = JSON.parse('<%- JSON.stringify(timer.id) %>');
                 
                 const hours = new Timer(48,
                 47-JSON.parse('<%- JSON.stringify( timer.duration.hours ) %>')-JSON.parse('<%- JSON.stringify( timer.elapsedTime.hours ) %>'),
@@ -179,7 +180,7 @@
                 function () {
                     return minutes.getRemaningTime() <= 0 && hours.getRemaningTime() <= 0 && seconds.getRemaningTime() <= 15;
                 }, function () {if (document.getElementById("toggleSound").classList.contains("active")) {tickSound.play()}});
-
+                
                 
                 // Set up timer properties
                 //hours.timeLimit = JSON.parse('<%- JSON.stringify( timer.duration.hours ) %>');

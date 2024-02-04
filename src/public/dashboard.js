@@ -59,6 +59,12 @@ async function fetchDashboardAndUpdateDOM() {
         data.timers.forEach((timer) => {
             const timerElement = document.createElement('div');
             timerElement.classList.add('timer');
+            if (timer.paused){
+                timerElement.classList.add('paused');
+            }
+            if (!timer.started){
+                timerElement.classList.add('stopped');
+            }
             timerElement.dataset.timerId = timer.id; // Set data attribute for timer id
             timerElement.innerHTML = `
             <h2>${timer.name}</h2>
@@ -66,13 +72,37 @@ async function fetchDashboardAndUpdateDOM() {
             <p>Paused: ${timer.paused}</p>
             <p>Started: ${timer.started}</p>
             <p>Elapsed Time: ${timer.elapsedTime.hours}h ${timer.elapsedTime.minutes}m ${timer.elapsedTime.seconds}s</p>
-            <button class="btn start-pause">${timer.paused? "Pause": "Resume" }</button>
+            <button class="btn start-stop">${timer.started? "Stop": "Start" }</button>
+            ${timer.started ? `<button class='btn resume-pause'>${timer.paused ? 'Resume' : 'Pause'}</button>` : ''}
             <button class="btn remove">Remove</button>
             <button class="btn fullscreen">&#x26F6;</button>
             `;
-            addRemoveButtonListeners();
-            addFullscreenButtonListeners();
-            addStartStopButtonListeners();
+            timerElement.querySelectorAll(".remove").forEach(button => {
+                button.addEventListener("click", () => {
+                    const timerId = button.parentElement.dataset.timerId; // Get the timer id
+                    removeTimer(timerId);
+                });
+            });
+            timerElement.querySelectorAll(".fullscreen").forEach(button => {
+                button.addEventListener("click", () => {
+                    const timerId = button.parentElement.dataset.timerId; // Get the timer id
+                    fullscreen(timerId);
+                });
+            });
+            timerElement.querySelectorAll(".resume-pause").forEach(button => {
+                button.addEventListener("click", () => {
+                    const timerId = button.parentElement.dataset.timerId; // Get the timer id
+                    resumePause(button, timerId);
+                    fetchDashboardAndUpdateDOM();
+                });
+            });
+            timerElement.querySelectorAll(".start-stop").forEach(button => {
+                button.addEventListener("click", () => {
+                    const timerId = button.parentElement.dataset.timerId; // Get the timer id
+                    startStop(button, timerId);
+                    fetchDashboardAndUpdateDOM();
+                });
+            });
             timersContainer.appendChild(timerElement);
         });
     } catch (error) {
@@ -134,14 +164,15 @@ function addFullscreenButtonListeners() {
         });
     });
 }
-// Function to start or stop a timer
-function startStop(button, timerId) {
+
+// Function to resume or pause a timer
+function resumePause(button, timerId) {
     const buttonText = button.innerText.trim(); // Get the trimmed text of the button
     let url = '';
     if (buttonText === 'Resume') {
-        url = `/auth/pauseTimer/${timerId}`; // If button text is 'Pause', we want to pause the timer
-    } else if (buttonText === 'Pause') {
         url = `/auth/resumeTimer/${timerId}`; // If button text is 'Resume', we want to resume the timer
+    } else if (buttonText === 'Pause') {
+        url = `/auth/pauseTimer/${timerId}`; // If button text is 'Pause', we want to pause the timer
     } else {
         url = `/auth/resumeTimer/${timerId}`;
     }
@@ -154,12 +185,44 @@ function startStop(button, timerId) {
             }
         })
         .then(response => {
-            console.log(response);
+            if (!response.ok) {
+                throw new Error('Failed to resume/pause timer');
+            }
+            // Toggle the button text between 'Start' and 'Stop'
+            button.innerText = buttonText === 'Resume' ? 'Pause' : 'Resume';
+        })
+        .catch(error => {
+            console.error('Error resuming/pausing timer:', error);
+            alert('Failed to resume/pause timer');
+        });
+}
+
+
+// Function to start or stop a timer
+function startStop(button, timerId) {
+    const buttonText = button.innerText.trim(); // Get the trimmed text of the button
+    let url = '';
+    if (buttonText === 'Start') {
+        url = `/auth/startTimer/${timerId}`; // If button text is 'Resume', we want to resume the timer
+    } else if (buttonText === 'Stop') {
+        url = `/auth/stopTimer/${timerId}`; // If button text is 'Pause', we want to pause the timer
+    } else {
+        url = `/auth/startTimer/${timerId}`;
+    }
+
+    fetch(url, {
+            method: 'PUT', // Both requests are PUT requests
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Include JWT token for authentication
+            }
+        })
+        .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to start/stop timer');
             }
             // Toggle the button text between 'Start' and 'Stop'
-            button.innerText = buttonText === 'Resume' ? 'Pause' : 'Resume';
+            button.innerText = buttonText === 'Stop' ? 'Start' : 'Stop';
         })
         .catch(error => {
             console.error('Error starting/stopping timer:', error);
@@ -168,9 +231,22 @@ function startStop(button, timerId) {
 }
 
 
+// Function to add event listeners for resume and pause buttons
+function addResumePauseButtonListeners() {
+    const resumePauseButtons = document.querySelectorAll(".resume-pause");
+
+    resumePauseButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const timerId = button.parentElement.dataset.timerId; // Get the timer id
+            resumePause(button, timerId);
+            fetchDashboardAndUpdateDOM();
+        });
+    });
+}
+
 // Function to add event listeners for start and stop buttons
-function addStartStopButtonListeners() {
-    const startStopButtons = document.querySelectorAll(".start-pause");
+function addStartStopListeners() {
+    const startStopButtons = document.querySelectorAll(".start-stop");
 
     startStopButtons.forEach(button => {
         button.addEventListener("click", () => {
@@ -184,5 +260,6 @@ function addStartStopButtonListeners() {
 document.addEventListener("DOMContentLoaded", () => {
     addRemoveButtonListeners();
     addFullscreenButtonListeners();
-    addStartStopButtonListeners();
+    addResumePauseButtonListeners();
+    addStartStopListeners();
 });

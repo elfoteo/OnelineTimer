@@ -177,4 +177,66 @@ router.put('/resumeTimer/:timerId', verifyToken, (req, res) => {
   res.status(200).send('Timer resumed successfully');
 });
 
+// Route to start a timer for a user
+router.put('/startTimer/:timerId', verifyToken, (req, res) => {
+  const timerId = parseInt(req.params.timerId); // Convert timerId to integer
+  const { username } = req.user;
+
+  // Read user data from JSON file
+  let users = readDataFromFile();
+  
+  // Find the user object in userData array
+  const user = users.find(user => user.username === username);
+  
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  // Find the timer object with the given timerId
+  const timer = user.timers.find(timer => timer.id === timerId);
+
+  if (!timer) {
+    return res.status(404).send('Timer not found');
+  }
+
+  // Start the timer
+  timer.started = true;
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
+  res.status(200).send('Timer paused successfully');
+});
+
+// Route to stop a timer for a user
+router.put('/stopTimer/:timerId', verifyToken, (req, res) => {
+  const timerId = parseInt(req.params.timerId); // Convert timerId to integer
+  const { username } = req.user;
+
+  // Read user data from JSON file
+  let users = readDataFromFile();
+  
+  // Find the user object in userData array
+  const user = users.find(user => user.username === username);
+  
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  // Find the timer object with the given timerId
+  const timer = user.timers.find(timer => timer.id === timerId);
+
+  if (!timer) {
+    return res.status(404).send('Timer not found');
+  }
+
+  // Stop the timer
+  timer.started = false;
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
+  res.status(200).send('Timer resumed successfully');
+});
+
 module.exports = router;

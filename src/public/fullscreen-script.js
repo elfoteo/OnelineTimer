@@ -49,12 +49,81 @@ function resume() {
 
 function toggle() { // Get's called when the button is clicked
     if (hours.paused) {
+        resumeTimer(timerId);
         resume();
         document.getElementById("toggleTimer").classList.add('active');
     } else {
+        pauseTimer(timerId);
         pause();
         document.getElementById("toggleTimer").classList.remove('active');
     }
+}
+
+// Function to resume a timer
+function resumeTimer(timerId) {
+    // Before resuming it we need to start it if is not already started
+    let url;
+    if (!seconds.started){
+        url = `/auth/startTimer/${timerId}`;
+
+        fetch(url, {
+                method: 'PUT', // PUT request to resume the timer
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Include JWT token for authentication
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to resume timer');
+                }
+            })
+            .catch(error => {
+                console.error('Error resuming timer:', error);
+                alert('Failed to resume timer');
+            });
+    }
+
+    url = `/auth/resumeTimer/${timerId}`;
+
+    fetch(url, {
+            method: 'PUT', // PUT request to resume the timer
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Include JWT token for authentication
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to resume timer');
+            }
+        })
+        .catch(error => {
+            console.error('Error resuming timer:', error);
+            alert('Failed to resume timer');
+        });
+}
+
+// Function to pause a timer
+function pauseTimer(timerId) {
+    const url = `/auth/pauseTimer/${timerId}`;
+
+    fetch(url, {
+            method: 'PUT', // PUT request to pause the timer
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Include JWT token for authentication
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to pause timer');
+            }
+        })
+        .catch(error => {
+            console.error('Error pausing timer:', error);
+            alert('Failed to pause timer');
+        });
 }
 
 function toggleSound() {  // Get's called when the button to toggle the sound is clicked

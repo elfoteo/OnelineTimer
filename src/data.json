@@ -60,7 +60,7 @@
           "seconds": 45
         },
         "paused": false,
-        "started": false,
+        "started": true,
         "elapsedTime": {
           "hours": 0,
           "minutes": 0,

@@ -1,4 +1,3 @@
-<!-- dashboard.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,11 +5,172 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <style>
-    /* Add your CSS styles here */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .timers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-gap: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .timer {
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      min-width: 225px;
+      flex: 1 0 225px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #0056b3;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+      height: 40px;
+    }
+
+    .btn:hover {
+      background-color: #004080;
+    }
+
+    .small-message {
+      font-size: 14pt;
+      font-style: italic;
+    }
+
+    form {
+      margin-top: 20px;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .form-container {
+      width: 50%;
+      background-color: #ccc;
+      border-radius: 8px;
+      margin: auto;
+    }
+
+    label {
+      width: 100px;
+      margin: 5px;
+      text-align: right;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      padding: 8px;
+      margin: 5px;
+      width: 200px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button[type="submit"] {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #0056b3;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #004080;
+    }
+
+    form button[type="submit"] {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #0056b3;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    form button[type="submit"]:hover {
+      background-color: #004080;
+    }
+
+    form label {
+      margin-top: 13px;
+    }
   </style>
 </head>
 <body>
-  <h1>Dashboard</h1>
-  <!-- Display user's dashboard content here -->
+  <div class="container">
+    <h1>Dashboard</h1>
+    <div class="timers">
+      <script>
+        var user = JSON.parse('<%- JSON.stringify(user) %>');
+     </script>
+      <% if (user.timers.length === 0) { %>
+        <p class="small-message">No timers to show.</p>
+      <% } else { %>
+        <% user.timers.forEach((timer, index) => { %>
+          <div class="timer" data-timer-id="<%= timer.id %>">
+            <h2><%= timer.name %></h2>
+            <p>Duration: <%= timer.duration.hours %>h <%= timer.duration.minutes %>m <%= timer.duration.seconds %>s</p>
+            <p>Paused: <%= timer.paused %></p>
+            <p>Started: <%= timer.started %></p>
+            <p>Elapsed Time: <%= timer.elapsedTime.hours %>h <%= timer.elapsedTime.minutes %>m <%= timer.elapsedTime.seconds %>s</p>
+            <button class="btn start-pause"><%= timer.paused? "Pause": "Start" %></button>
+            <button class="btn remove">Remove</button>
+            <button class="btn fullscreen">&#x26F6;</button>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+    <h2>Add Timer</h2>
+    <div class="form-container">
+      <form id="addTimerForm">
+        <label for="timerName">Timer Name:</label>
+        <input type="text" id="timerName" name="timerName" required><br>
+        <label for="hours">Hours:</label>
+        <input type="number" id="hours" name="hours" min="0" value="0"><br>
+        <label for="minutes">Minutes:</label>
+        <input type="number" id="minutes" name="minutes" min="0" value="0"><br>
+        <label for="seconds">Seconds:</label>
+        <input type="number" id="seconds" name="seconds" min="0" value="0"><br>
+        <button type="submit">Add Timer</button>
+      </form>
+    </div>
+    <script src="/dashboard.js"></script>
+  </div>
 </body>
 </html>

@@ -6,10 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const SECRET_KEY = require('../utils/constants');
-
-// Define path to the JSON file
-const dataFilePath = path.join(__dirname, '..', 'data.json');
+const verifyToken = require('../utils/verifyToken');
+const {SECRET_KEY, dataFilePath} = require('../utils/constants.js')
 
 // Helper function to read data from the JSON file
 const readDataFromFile = () => {
@@ -42,7 +40,8 @@ router.post('/register', async (req, res) => {
   // Add the new user with hashed password to the array
   users.push({
       username: req.body.username,
-      password: hashedPassword
+      password: hashedPassword,
+      timers: []
   });
 
   // Write the updated users data back to the JSON file
@@ -50,7 +49,6 @@ router.post('/register', async (req, res) => {
 
   res.render('login', {registered: true});
 });
-  
   
 
 // Login route
@@ -78,6 +76,79 @@ router.post('/login', async (req, res) => {
     } else {
         return res.render('login', {loginFailure: true});
     }
+});
+
+// Route to create a new timer for a user
+router.post('/timer', verifyToken, (req, res) => {
+  const { name, duration } = req.body;
+  const { username } = req.user;
+
+  // Read existing users data from the JSON file
+  let users = readDataFromFile();
+
+  // Find the user by username
+  const userIndex = users.findIndex((user) => user.username === username);
+
+  if (userIndex === -1) {
+    return res.status(404).send('User not found');
+  }
+
+  // Generate unique ID for the new timer
+  const timerId = Math.floor(Math.random() * 1000);
+
+  // Create the new timer object
+  const newTimer = {
+    id: timerId,
+    name: name || `Timer ${timerId}`,
+    duration: duration || { hours: 0, minutes: 0, seconds: 0 },
+    paused: true,
+    elapsedTime: { hours: 0, minutes: 0, seconds: 0 },
+  };
+
+  // Add the new timer to the user's timers array
+  users[userIndex].timers.push(newTimer);
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
+  res.status(201).send('Timer created successfully');
+});
+
+// Route to create a new timer for a user
+router.post('/addTimer', verifyToken, (req, res) => {
+  const { name, duration } = req.body;
+  const { username } = req.user;
+
+  // Read existing users data from the JSON file
+  let users = readDataFromFile();
+
+  // Find the user by username
+  const userIndex = users.findIndex((user) => user.username === username);
+
+  if (userIndex === -1) {
+    return res.status(404).send('User not found');
+  }
+
+  // Generate unique ID for the new timer
+  const timerId = Math.floor(Math.random() * 1000);
+
+  // Create the new timer object
+  const newTimer = {
+    id: timerId,
+    name: name || `Timer ${timerId}`,
+    duration: duration || { hours: 0, minutes: 0, seconds: 0 },
+    paused: false,
+    started: false,
+    elapsedTime: { hours: 0, minutes: 0, seconds: 0 },
+  };
+
+  // Add the new timer to the user's timers array
+  users[userIndex].timers.push(newTimer);
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
+  res.status(201).send('Timer created successfully');
 });
 
 module.exports = router;

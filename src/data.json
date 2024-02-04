@@ -1,10 +1,99 @@
 [
   {
     "username": "admin",
-    "password": "$2b$10$UkV9mkn81zr3JiaO3i4IAu8lPXwqgbv0OV8FfaAk70m2.L/xWu1sC"
+    "password": "$2b$10$UkV9mkn81zr3JiaO3i4IAu8lPXwqgbv0OV8FfaAk70m2.L/xWu1sC",
+    "timers": [
+      {
+        "id": 572,
+        "name": "a",
+        "duration": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        },
+        "paused": false,
+        "started": false,
+        "elapsedTime": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        }
+      },
+      {
+        "id": 178,
+        "name": "b",
+        "duration": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        },
+        "paused": false,
+        "started": false,
+        "elapsedTime": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        }
+      },
+      {
+        "id": 282,
+        "name": "c",
+        "duration": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        },
+        "paused": false,
+        "started": false,
+        "elapsedTime": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        }
+      },
+      {
+        "id": 134,
+        "name": "test",
+        "duration": {
+          "hours": 10,
+          "minutes": 20,
+          "seconds": 30
+        },
+        "paused": false,
+        "started": false,
+        "elapsedTime": {
+          "hours": 0,
+          "minutes": 10,
+          "seconds": 0
+        }
+      }
+    ]
   },
   {
     "username": "abcdefg",
-    "password": "$2b$10$8FMYg4Fwlb89nRwrgN2H8OMJmUzQiAr5Rff3YWvp1jt/UBl5Z2JWW"
+    "password": "$2b$10$8FMYg4Fwlb89nRwrgN2H8OMJmUzQiAr5Rff3YWvp1jt/UBl5Z2JWW",
+    "timers": []
+  },
+  {
+    "username": "abc",
+    "password": "$2b$10$e9KO/xOpc1X9TSwjPLSmau5GbGc55b1EHqE2Rsz.Z53FCWLjWrfv2",
+    "timers": [
+      {
+        "id": 150,
+        "name": "a",
+        "duration": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        },
+        "paused": false,
+        "started": false,
+        "elapsedTime": {
+          "hours": 0,
+          "minutes": 0,
+          "seconds": 0
+        }
+      }
+    ]
   }
 ]

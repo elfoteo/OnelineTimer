@@ -90,7 +90,7 @@ app.get('/fullscreen/:username/:timerId', (req, res) => {
   }
 
   // Render the fullscreen view and pass the timer object and user
-  res.render('fullscreen', { timer, user, isOwner });
+  res.render('fullscreen', { timerId, user, isOwner });
 });
 
 
@@ -151,18 +151,84 @@ app.get('/dashboard-json', verifyToken, (req, res) => {
   const username = req.user.username;
 
   // Read user data from JSON file
-  const userData = readUserData();
+  let users = readUserData();
 
   // Find the user object in userData array
-  const user = userData.find(user => user.username === username);
+  const user = users.find(user => user.username === username);
 
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
 
+  // Update elapsed time for each timer
+  user.timers.forEach(timer => {
+    if (!timer.paused && timer.started) {
+      const elapsedTime = Date.now() - timer.timerAddedDate;
+      timer.elapsedTime.seconds = Math.floor(elapsedTime / 1000) % 60;
+      timer.elapsedTime.minutes = Math.floor(elapsedTime / 60000) % 60;
+      timer.elapsedTime.hours = Math.floor(elapsedTime / 3600000);
+      // Adjust the elapsed time
+      if (timer.elapsedTime.seconds >= 60) {
+        timer.elapsedTime.minutes += Math.floor(timer.elapsedTime.seconds / 60);
+        timer.elapsedTime.seconds %= 60;
+      }
+      if (timer.elapsedTime.minutes >= 60) {
+        timer.elapsedTime.hours += Math.floor(timer.elapsedTime.minutes / 60);
+        timer.elapsedTime.minutes %= 60;
+      }
+    }
+  });
+
+  // Write the updated users data back to the JSON file
+  writeDataToFile(users);
+
   // Send the user object as JSON response
   res.json(user);
 });
+
+// Define route to serve JSON data for a specific timer
+app.get('/timer-json/:timerId', (req, res) => {
+  const timerId = parseInt(req.params.timerId); // Get the timer ID from the request parameters
+
+  // Read user data from JSON file
+  const users = readUserData();
+
+  // Find the timer with the given ID
+  let timerData;
+  users.forEach(user => {
+    const timer = user.timers.find(timer => timer.id === timerId);
+    if (timer) {
+      timerData = timer;
+      return; // Exit loop once timer is found
+    }
+  });
+
+  if (!timerData) {
+    return res.status(404).json({ error: 'Timer not found' });
+  }
+
+  // Update elapsed time if the timer is running
+  if (!timerData.paused && timerData.started) {
+    const elapsedTime = Date.now() - timerData.timerAddedDate;
+    timerData.elapsedTime.seconds = Math.floor(elapsedTime / 1000) % 60;
+    timerData.elapsedTime.minutes = Math.floor(elapsedTime / 60000) % 60;
+    timerData.elapsedTime.hours = Math.floor(elapsedTime / 3600000);
+    // Adjust the elapsed time
+    if (timerData.elapsedTime.seconds >= 60) {
+      timerData.elapsedTime.minutes += Math.floor(timerData.elapsedTime.seconds / 60);
+      timerData.elapsedTime.seconds %= 60;
+    }
+    if (timerData.elapsedTime.minutes >= 60) {
+      timerData.elapsedTime.hours += Math.floor(timerData.elapsedTime.minutes / 60);
+      timerData.elapsedTime.minutes %= 60;
+    }
+  }
+
+  // Send the timer data as JSON response
+  res.json(timerData);
+});
+
+
 
 // Start server
 app.listen(PORT, () => {

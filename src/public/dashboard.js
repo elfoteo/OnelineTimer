@@ -258,8 +258,13 @@ function addStartStopListeners() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Make the UI interactable
     addRemoveButtonListeners();
     addFullscreenButtonListeners();
     addResumePauseButtonListeners();
     addStartStopListeners();
+    // Update each second the UI
+    setInterval(function() {
+        fetchDashboardAndUpdateDOM()
+    }, 1000);
 });

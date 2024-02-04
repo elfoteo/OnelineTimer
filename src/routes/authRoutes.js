@@ -104,6 +104,7 @@ router.post('/addTimer', verifyToken, (req, res) => {
     paused: false,
     started: false,
     elapsedTime: { hours: 0, minutes: 0, seconds: 0 },
+    timerAddedDate: Date.now()
   };
 
   // Add the new timer to the user's timers array
@@ -114,7 +115,6 @@ router.post('/addTimer', verifyToken, (req, res) => {
 
   res.status(201).send('Timer created successfully');
 });
-
 // Route to pause a timer for a user
 router.put('/pauseTimer/:timerId', verifyToken, (req, res) => {
   const timerId = parseInt(req.params.timerId); // Convert timerId to integer
@@ -138,7 +138,26 @@ router.put('/pauseTimer/:timerId', verifyToken, (req, res) => {
   }
 
   // Pause the timer
-  timer.paused = true;
+  if (!timer.paused) {
+    timer.paused = true;
+    timer.pauseStartTime = Date.now(); // Store the current time when pausing
+  }
+
+  // Calculate the elapsed time before pausing
+  const elapsedBeforePausing = Date.now() - timer.timerAddedDate;
+  // Add the elapsed time before pausing to the total elapsed time
+  timer.elapsedTime.seconds += Math.floor(elapsedBeforePausing / 1000) % 60;
+  timer.elapsedTime.minutes += Math.floor(elapsedBeforePausing / 60000) % 60;
+  timer.elapsedTime.hours += Math.floor(elapsedBeforePausing / 3600000);
+  // Adjust the elapsed time
+  if (timer.elapsedTime.seconds >= 60) {
+    timer.elapsedTime.minutes += Math.floor(timer.elapsedTime.seconds / 60);
+    timer.elapsedTime.seconds %= 60;
+  }
+  if (timer.elapsedTime.minutes >= 60) {
+    timer.elapsedTime.hours += Math.floor(timer.elapsedTime.minutes / 60);
+    timer.elapsedTime.minutes %= 60;
+  }
 
   // Write the updated users data back to the JSON file
   writeDataToFile(users);
@@ -169,13 +188,18 @@ router.put('/resumeTimer/:timerId', verifyToken, (req, res) => {
   }
 
   // Resume the timer
-  timer.paused = false;
+  if (timer.paused) {
+    timer.paused = false;
+    // Store the elapsed time before resuming
+    timer.timerAddedDate = Date.now();
+  }
 
   // Write the updated users data back to the JSON file
   writeDataToFile(users);
 
   res.status(200).send('Timer resumed successfully');
 });
+
 
 // Route to start a timer for a user
 router.put('/startTimer/:timerId', verifyToken, (req, res) => {

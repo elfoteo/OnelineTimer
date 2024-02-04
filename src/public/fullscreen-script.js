@@ -1,6 +1,9 @@
 let selectedId = "img-1";
 // Get the reset button element
 let resetButton;
+let previousSeconds = "";
+let previousMinutes = "";
+let previousHours = "";
 
 function pause() {
     hours.paused = true;
@@ -149,6 +152,11 @@ function reset(fromUser=false){
         if (animationTimeout){
             clearTimeout(animationTimeout);
         }
+        if (canModifyTimer){
+            previousHours = document.getElementById("hoursInput").value;
+            previousMinutes = document.getElementById("minutesInput").value;
+            previousSeconds = document.getElementById("secondsInput").value;
+        }
         document.getElementById("toggleTimer").classList.remove('active');
         document.getElementById("reset-icon").classList.add('active');
         document.getElementById("reset-button").classList.remove('click-to-update');
@@ -162,6 +170,15 @@ function reset(fromUser=false){
     hours.reset();
     minutes.reset();
     seconds.reset();
+    if (canModifyTimer){
+        // Set the new time values from the user input
+        let hoursInput = parseInt(document.getElementById("hoursInput").value);
+        let minutesInput = parseInt(document.getElementById("minutesInput").value);
+        let secondsInput = parseInt(document.getElementById("secondsInput").value);
+        hours.timePassed = hours.maxTime-hoursInput-1;
+        minutes.timePassed = minutes.maxTime-minutesInput-1;
+        seconds.timePassed = seconds.maxTime-secondsInput-1;
+    }
     // Update timer visually
     hours.update(false);
     minutes.update(false);
@@ -170,6 +187,7 @@ function reset(fromUser=false){
     minutes.animate();
     seconds.animate();
 }
+
 // Function to create particles
 function createParticles() {
     const particleContainer = document.getElementById("particle-container");
@@ -290,8 +308,48 @@ function animateParticles(particles) {
     requestAnimationFrame(animate); // Initial call to start the animation
 }
 
+
 function updateTimerValues(){
-    
+    if (canModifyTimer){
+        let hoursInput = parseInt(document.getElementById("hoursInput").value);
+        let minutesInput = parseInt(document.getElementById("minutesInput").value);
+        let secondsInput = parseInt(document.getElementById("secondsInput").value);
+        let changedSeconds = seconds.timeLimit - seconds.timePassed != secondsInput;
+        let changedMinutes = minutes.timeLimit - minutes.timePassed != minutesInput;
+        let changedHours = hours.timeLimit - hours.timePassed != hoursInput;
+        
+        if (!seconds.started){
+            seconds.label.text(d => secondsInput);
+            seconds.label.classed("changed", changedSeconds);
+        }
+        else{
+            seconds.label.classed("changed", false);
+        }
+        if (!minutes.started){
+            minutes.label.text(d => minutesInput);
+            minutes.label.classed("changed", changedMinutes);
+        }
+        else{
+            minutes.label.classed("changed", false);
+        }
+        if (!hours.started){
+            hours.label.text(d => hoursInput);
+            hours.label.classed("changed", changedHours);
+        }
+        else{
+            hours.label.classed("changed", false);
+        }
+        if (hours.paused){
+            hours.timerName.classed("paused", true);
+        }
+        if (minutes.paused){
+            minutes.timerName.classed("paused", true);
+        }
+        if (seconds.paused){
+            seconds.timerName.classed("paused", true);
+        }
+        setTimeout(updateTimerValues, 100);
+    }
 }
 
 function flashInputRed(input) {
@@ -307,11 +365,67 @@ function flashInputRed(input) {
 }
 
 function validateNumber(input) {
-    
+    // Get the entered value
+    let enteredValue = parseInt(input.value, 10);
+    if (isNaN(enteredValue)) {
+        input.value = input.min+"";
+    }
+
+    // Check if the value is within the allowed range
+    if (enteredValue < parseInt(input.min, 10) || enteredValue > parseInt(input.max, 10)) {
+        // If not, set the value to the minimum or maximum
+        input.value = Math.min(Math.max(enteredValue, parseInt(input.min, 10)), parseInt(input.max, 10));
+
+        flashInputRed(input);
+    } else {
+        // If the "animation" didn't get removed correctly remove it
+        input.classList.remove('out-of-range');
+    }
+    // To be sure the timer has not all inputs set to 0: 0h 0m 0s we do an additional check and call the validate seconds function
+    // To be sure that the call is not recursive tho we will add a check to not call it if the input is the seconds input
+    if (previousSeconds != document.getElementById("secondsInput").value ||
+        previousMinutes != document.getElementById("minutesInput").value ||
+        previousHours != document.getElementById("hoursInput").value){
+        document.getElementById("reset-button").classList.add('click-to-update')
+    }
+    else {
+        document.getElementById("reset-button").classList.remove('click-to-update')
+    }
+    if (input.id != "secondsInput") {
+        validateSeconds(document.getElementById("secondsInput"));
+    }
+
+    // Check for bigger values then 48hs
+    // Get the input values
+    let hours = parseInt(document.getElementById("hoursInput").value);
+    let minutes = parseInt(document.getElementById("minutesInput").value);
+    let seconds = parseInt(document.getElementById("secondsInput").value);
+
+    // Calculate total time in seconds
+    let totalTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+
+    // Check if total time exceeds 48 hours (48 * 3600 seconds)
+    if (totalTimeInSeconds > 48 * 3600) {
+        // Flash input fields red and set time to 48 hours
+        flashInputRed(document.getElementById("hoursInput"));
+        flashInputRed(document.getElementById("minutesInput"));
+        flashInputRed(document.getElementById("secondsInput"));
+
+        // Set the time to 48 hours
+        document.getElementById("hoursInput").value = 48;
+        document.getElementById("minutesInput").value = 0;
+        document.getElementById("secondsInput").value = 0;
+    }
 }
 
 function validateSeconds() {
-    
+    input = document.getElementById("secondsInput");
+    validateNumber(input);
+    // If hours and minutes are 0 then don't allow a timer with 0h 0m 0s but set seconds to at least 1s
+    if (parseInt(document.getElementById("hoursInput").value) <= 0 && parseInt(document.getElementById("minutesInput").value) <= 0 && parseInt(input.value) <= 0){
+        input.value = parseInt(input.min)+1+"";
+        flashInputRed(input);
+    } 
 }
 
 function uploadImageClick(){
@@ -605,4 +719,9 @@ window.addEventListener('DOMContentLoaded', function() {
         document.getElementById("toggleTheme").classList.toggle('active');
     }
     this.setTimeout(updateTimerValues, 1);
+    if (canModifyTimer){
+        previousHours = document.getElementById("hoursInput").value;
+        previousMinutes = document.getElementById("minutesInput").value;
+        previousSeconds = document.getElementById("secondsInput").value;
+    }
 })

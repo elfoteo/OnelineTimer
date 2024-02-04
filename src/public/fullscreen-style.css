@@ -12,6 +12,15 @@ body.darkTheme {
     color: #000;
 }
 
+.warning-message {
+    font-size: 18px;
+    padding: 20px;
+    text-align: center;
+    animation: changeHintColorAnimation 5s linear infinite;
+    background-color: black;
+    user-select: none;
+}
+
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;

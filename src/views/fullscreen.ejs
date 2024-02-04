@@ -12,6 +12,11 @@
     </head>
     <body id="body">
         <div style="width: 100%">
+            <% if (isOwner) { %>
+                <div class="warning-message">
+                    All the changes made to this page will be displayed to the viewers once they update their page.
+                </div>
+            <% } %>
             <div class="container"></div>
             <div class = "controls-container">
                 <button onclick="toggle()" id="toggleTimer" class="timerControl">
@@ -124,120 +129,115 @@
 
                 // Get timer properties from the provided arguments
                 const user = JSON.parse('<%- JSON.stringify(user) %>');
-                const timerId = JSON.parse('<%- JSON.stringify(timer.id) %>');
-                
-                const hours = new Timer(48,
-                47-JSON.parse('<%- JSON.stringify( timer.duration.hours ) %>')-JSON.parse('<%- JSON.stringify( timer.elapsedTime.hours ) %>'),
-                250, 250, "hours",
-                function () {
+                const timerId = JSON.parse('<%- JSON.stringify(timerId) %>');
 
-                }, false, function () {return false;});
-                
-                const minutes = new Timer(60,
-                59-JSON.parse('<%- JSON.stringify( timer.duration.minutes ) %>')+JSON.parse('<%- JSON.stringify( timer.elapsedTime.minutes ) %>'),
-                250, 250, "minutes",
-                function () {
-                    if (hours.maxTime-hours.timePassed <= 0){
-                        minutes.started = false;
-                        minutes.animate();
-                        minutes.label.text(0);
-                        return;
-                    }
-                    else{
-                        
-                        hours.update();
-                        minutes.timeLimit = minutes.maxTime;
-                        minutes.paused = false;
-                        minutes.started = true;
-                        minutes.timePassed = 0;
-                        minutes.update();
-                    }
-                }, false, function () {return false;});
-                const seconds = new Timer(60, 
-                59-JSON.parse('<%- JSON.stringify( timer.duration.seconds ) %>')+JSON.parse('<%- JSON.stringify( timer.elapsedTime.seconds ) %>'),
-                250, 250, "seconds",
-                function () {
-                    if (minutes.maxTime-minutes.timePassed <= 0 && hours.maxTime-hours.timePassed <= 0){
-                        // Pause the timer and play the end sound
-                        if (document.getElementById("toggleSound").classList.contains("active")) {
-                            beepEndSound.play();
-                            alert("Time is up!");
-                            beepEndSound.pause();
-                            beepEndSound.currentTime = 0;
+                async function fetchTimerData(timerId) {
+                    try {
+                        const response = await fetch('/timer-json/' + timerId);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch timer data');
                         }
-                        document.getElementById("toggleTimer").classList.remove('active');
-                        reset();
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        console.error('Error fetching timer data:', error);
+                        return null; // Return null if there's an error
                     }
-                    else{
-                        minutes.update();
-                        seconds.timeLimit = minutes.maxTime;
-                        seconds.timePassed = 0;
-                        seconds.started = true;
-                        seconds.maxTime = seconds.timeLimit;
-                        seconds.update();
-                    }
-                }, true,
-                function () {
-                    return minutes.getRemaningTime() <= 0 && hours.getRemaningTime() <= 0 && seconds.getRemaningTime() <= 15;
-                }, function () {if (document.getElementById("toggleSound").classList.contains("active")) {tickSound.play()}});
-                
-                
-                // Set up timer properties
-                //hours.timeLimit = JSON.parse('<%- JSON.stringify( timer.duration.hours ) %>');
-                //hours.timePassed = JSON.parse('<%- JSON.stringify( timer.elapsedTime.hours ) %>');
-                hours.started = JSON.parse('<%- JSON.stringify( timer.started ) %>');
-                hours.paused = hours.started? JSON.parse('<%- JSON.stringify( timer.paused ) %>'): true;
-        
-                //minutes.timeLimit = JSON.parse('<%- JSON.stringify( timer.duration.minutes ) %>');
-                //minutes.timePassed = JSON.parse('<%- JSON.stringify( timer.elapsedTime.minutes ) %>');
-                minutes.started = JSON.parse('<%- JSON.stringify( timer.started ) %>');
-                minutes.paused = minutes.started? JSON.parse('<%- JSON.stringify( timer.paused ) %>'): true;
-        
-                
-                //seconds.timeLimit = JSON.parse('<%- JSON.stringify( timer.duration.seconds ) %>');
-                //seconds.timePassed = JSON.parse('<%- JSON.stringify( timer.elapsedTime.seconds ) %>');
-                seconds.started = JSON.parse('<%- JSON.stringify( timer.started ) %>');
-                seconds.paused = seconds.started? JSON.parse('<%- JSON.stringify( timer.paused ) %>'): true;
-
-                hours.animate()
-                minutes.animate()
-                seconds.animate() 
-
-                if (seconds.started && !seconds.paused){
-                    hours.paused = false;
-                    hours.started = true;
-                    hours.field.each(d => {
-                        d.previous = undefined;
-                    });
-                    hours.path.transition()
-                        .ease("elastic")
-                        .duration(500)
-                        .attrTween("d", hours.arcTween(hours.width));
-                    hours.animate();
-                    hours.update(true);
-                    minutes.paused = false;
-                    minutes.started = true;
-                    minutes.field.each(d => {
-                        d.previous = undefined;
-                    });
-                    minutes.path.transition()
-                        .ease("elastic")
-                        .duration(500)
-                        .attrTween("d", minutes.arcTween(minutes.width));
-                    minutes.animate();
-                    minutes.update(true);
-                    seconds.paused = false;
-                    seconds.started = true;
-                    seconds.field.each(d => {
-                        d.previous = undefined;
-                    });
-                    seconds.path.transition()
-                        .ease("elastic")
-                        .duration(500)
-                        .attrTween("d", seconds.arcTween(seconds.width));
-                    seconds.animate();
-                    seconds.update();
                 }
+
+                async function getDataAndContinue(timerId) {
+                    try {
+                        const timerData = await fetchTimerData(timerId);
+                        if (!timerData) {
+                            // Handle the case when timer data is not available
+                            return;
+                        }
+
+                        console.log(timerData); // Log the fetched timer data
+
+                        // Initialize the timer objects using the fetched data
+                        const hours = new Timer(48,
+                            47 - timerData.duration.hours - timerData.elapsedTime.hours,
+                            250, 250, "hours",
+                            function () {
+                                // Callback function for hours timer
+                            }, false, function () {return false;});
+
+                        const minutes = new Timer(60,
+                            59 - timerData.duration.minutes + timerData.elapsedTime.minutes,
+                            250, 250, "minutes",
+                            function () {
+                                // Callback function for minutes timer
+                            }, false, function () {return false;});
+
+                        const seconds = new Timer(60,
+                            59 - timerData.duration.seconds + timerData.elapsedTime.seconds,
+                            250, 250, "seconds",
+                            function () {
+                                // Callback function for seconds timer
+                            }, true,
+                            function () {
+                                return minutes.getRemaningTime() <= 0 && hours.getRemaningTime() <= 0 && seconds.getRemaningTime() <= 15;
+                            }, function () {if (document.getElementById("toggleSound").classList.contains("active")) {tickSound.play()}});
+
+                        // Set up timer properties
+                        hours.started = timerData.started;
+                        hours.paused = hours.started ? timerData.paused : true;
+
+                        minutes.started = timerData.started;
+                        minutes.paused = minutes.started ? timerData.paused : true;
+
+                        seconds.started = timerData.started;
+                        seconds.paused = seconds.started ? timerData.paused : true;
+
+                        hours.animate();
+                        minutes.animate();
+                        seconds.animate();
+
+                        // Handle timer animation logic based on timer state
+                        if (seconds.started && !seconds.paused) {
+                            hours.paused = false;
+                            hours.started = true;
+                            hours.field.each(d => {
+                                d.previous = undefined;
+                            });
+                            hours.path.transition()
+                                .ease("elastic")
+                                .duration(500)
+                                .attrTween("d", hours.arcTween(hours.width));
+                            hours.animate();
+                            hours.update(true);
+                            minutes.paused = false;
+                            minutes.started = true;
+                            minutes.field.each(d => {
+                                d.previous = undefined;
+                            });
+                            minutes.path.transition()
+                                .ease("elastic")
+                                .duration(500)
+                                .attrTween("d", minutes.arcTween(minutes.width));
+                            minutes.animate();
+                            minutes.update(true);
+                            seconds.paused = false;
+                            seconds.started = true;
+                            seconds.field.each(d => {
+                                d.previous = undefined;
+                            });
+                            seconds.path.transition()
+                                .ease("elastic")
+                                .duration(500)
+                                .attrTween("d", seconds.arcTween(seconds.width));
+                            seconds.animate();
+                            seconds.update();
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                }
+
+                // Call the function to fetch timer data and proceed
+                getDataAndContinue(timerId);
+
             </script>
             <script src="/fullscreen-script.js"></script>
         </div>

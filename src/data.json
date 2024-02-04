@@ -52,20 +52,22 @@
         }
       },
       {
-        "id": 68,
-        "name": "timer",
+        "id": 841,
+        "name": "test",
         "duration": {
           "hours": 12,
-          "minutes": 23,
-          "seconds": 45
+          "minutes": 34,
+          "seconds": 56
         },
         "paused": false,
         "started": true,
         "elapsedTime": {
           "hours": 0,
-          "minutes": 0,
-          "seconds": 0
-        }
+          "minutes": 32,
+          "seconds": 34
+        },
+        "timerAddedDate": 1707059050399,
+        "pauseStartTime": 1707058684704
       }
     ]
   },

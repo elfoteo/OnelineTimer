@@ -19,9 +19,19 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        body.dark-theme {
+          background-color: #333;
+        }
+        body.dark-theme .container {
+          background-color: #111;
+          color: #fff;
+        }
         h1 {
             text-align: center;
             color: #333;
+        }
+        body.dark-theme h1 {
+          color: #fff;
         }
         form {
             margin-top: 20px;
@@ -31,6 +41,9 @@
             display: block;
             margin-bottom: 5px;
             color: #333;
+        }
+        body.dark-theme label {
+          color: #fafafa;
         }
         input[type="text"],
         input[type="password"] {
@@ -60,11 +73,41 @@
           margin: 0px;
           margin-bottom: 5px;
         }
+
+        .container {
+            position: relative;
+        }
+
+        .theme-switch-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .theme-switch-btn:hover {
+          background-color: transparent;
+        }
+
+        .theme-icon {
+            width: 30px;
+            height: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
   <div class="container">
     <h1>Register</h1>
+    <button id="themeSwitchBtn" class="theme-switch-btn">
+        <img id="sunIcon" class="theme-icon hidden" src="/images/sun.svg" alt="Sun Icon" width="30">
+        <img id="moonIcon" class="theme-icon" src="/images/moon.svg" alt="Moon Icon" width="30" style="filter: invert(1)">
+    </button>
     <form action="/auth/register" method="POST">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br>
@@ -80,6 +123,45 @@
     <div class="cta">
         <p>Already have an account? <a href="/login">Login</a></p>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          const themeSwitchBtn = document.getElementById("themeSwitchBtn");
+          const sunIcon = document.getElementById("sunIcon");
+          const moonIcon = document.getElementById("moonIcon");
+          const body = document.body;
+          
+          // Check if theme preference exists in localStorage
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme) {
+            body.classList.add(savedTheme); // Apply the saved theme
+            if (savedTheme === "dark-theme") {
+              sunIcon.classList.remove("hidden");
+              moonIcon.classList.add("hidden");
+            }
+            else{
+              sunIcon.classList.add("hidden");
+              moonIcon.classList.remove("hidden");
+            }
+          }
+      
+          // Event listener for theme switch button
+          themeSwitchBtn.addEventListener("click", function() {
+            // Toggle between sun and moon icons
+            sunIcon.classList.toggle("hidden");
+            moonIcon.classList.toggle("hidden");
+      
+            // Toggle between light and dark theme
+            body.classList.toggle("dark-theme");
+            
+            // Update theme preference in localStorage
+            if (body.classList.contains("dark-theme")) {
+              localStorage.setItem("theme", "dark-theme");
+            } else {
+              localStorage.setItem("theme", "");
+            }
+          });
+        });
+      </script>  
   </div>
 </body>
 </html>

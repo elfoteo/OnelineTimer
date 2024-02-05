@@ -4,21 +4,22 @@
     "password": "$2b$10$UkV9mkn81zr3JiaO3i4IAu8lPXwqgbv0OV8FfaAk70m2.L/xWu1sC",
     "timers": [
       {
-        "id": 22,
-        "name": "aaaaaa",
+        "id": 16,
+        "name": "My Timer",
         "duration": {
           "hours": 0,
           "minutes": 2,
           "seconds": 30
         },
-        "paused": false,
-        "started": true,
+        "paused": true,
+        "started": false,
         "elapsedTime": {
           "hours": 0,
           "minutes": 0,
-          "seconds": 12
+          "seconds": 5
         },
-        "timerAddedDate": 1707069470301
+        "timerAddedDate": 1707107876358,
+        "pauseStartTime": 1707107881959
       }
     ]
   },

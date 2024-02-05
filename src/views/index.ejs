@@ -11,6 +11,16 @@
             padding: 0;
             background-color: #f2f2f2;
         }
+
+        body.dark-theme {
+          background-color: #333;
+        }
+        body.dark-theme .container {
+          background-color: #111;
+          color: #fff;
+        }
+
+
         .container {
             max-width: 800px;
             margin: 50px auto;
@@ -24,11 +34,17 @@
             color: #333;
             margin-bottom: 20px;
         }
+        body.dark-theme h1 {
+          color: #fff;
+        }
         p {
             color: #666;
             font-size: 18px;
             line-height: 1.5;
             margin-bottom: 30px;
+        }
+        body.dark-theme p {
+          color: #CCC;
         }
         .cta {
             margin-top: 30px;
@@ -46,17 +62,82 @@
         .cta a:hover {
             background-color: #0056b3;
         }
+
+        .container {
+            position: relative;
+        }
+
+        .theme-switch-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        .theme-icon {
+            width: 30px;
+            height: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to the Timer App</h1>
+        <button id="themeSwitchBtn" class="theme-switch-btn">
+            <img id="sunIcon" class="theme-icon hidden" src="/images/sun.svg" alt="Sun Icon" width="30">
+            <img id="moonIcon" class="theme-icon" src="/images/moon.svg" alt="Moon Icon" width="30" style="filter: invert(1)">
+        </button>
         <p>This is a simple timer application where you can keep track of your tasks efficiently. Stay focused, manage your time effectively, and boost your productivity with our intuitive timer features.</p>
         <div class="cta">
             <a href="/register">Register</a>
             <span>or</span>
             <a href="/login">Login</a>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+              const themeSwitchBtn = document.getElementById("themeSwitchBtn");
+              const sunIcon = document.getElementById("sunIcon");
+              const moonIcon = document.getElementById("moonIcon");
+              const body = document.body;
+              
+              // Check if theme preference exists in localStorage
+              const savedTheme = localStorage.getItem("theme");
+              if (savedTheme) {
+                body.classList.add(savedTheme); // Apply the saved theme
+                if (savedTheme === "dark-theme") {
+                  sunIcon.classList.remove("hidden");
+                  moonIcon.classList.add("hidden");
+                }
+                else{
+                  sunIcon.classList.add("hidden");
+                  moonIcon.classList.remove("hidden");
+                }
+              }
+          
+              // Event listener for theme switch button
+              themeSwitchBtn.addEventListener("click", function() {
+                // Toggle between sun and moon icons
+                sunIcon.classList.toggle("hidden");
+                moonIcon.classList.toggle("hidden");
+          
+                // Toggle between light and dark theme
+                body.classList.toggle("dark-theme");
+                
+                // Update theme preference in localStorage
+                if (body.classList.contains("dark-theme")) {
+                  localStorage.setItem("theme", "dark-theme");
+                } else {
+                  localStorage.setItem("theme", "");
+                }
+              });
+            });
+          </script>  
     </div>
 </body>
 </html>
